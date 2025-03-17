@@ -1,0 +1,14 @@
+{
+    "variables": {
+      "Concentración de Glucosa (g/L)": [2, 4, 6, 5, 8, 10],
+      "pH": [6.8, 7.0, 7.2, 7.0, 7.2, 7.4],
+      "Velocidad de Agitación (rpm)": [100, 150, 200, 180, 220, 250],
+      "Estrategia de Alimentación (0=batch, 1=perfusión)": [0, 0, 0, 1, 1, 1]
+    },
+    "metrics": {
+      "Productividad (g/L)": [1.0, 1.5, 2.0, 2.2, 2.8, 3.2],
+      "Calidad (% de mAb plenamente funcional)": [90, 92, 93, 95, 96, 97],
+      "Costo (€)": [5000, 5500, 6000, 6500, 7000, 7500]
+    }
+  }
+  

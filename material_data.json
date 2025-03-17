@@ -1,0 +1,13 @@
+{
+  "variables": {
+    "Porcentaje de Ni (%)": [60, 65, 70, 72, 75, 78],
+    "Porcentaje de Cr (%)": [10, 12, 13, 14, 15, 16],
+    "Temperatura de Solubilización (°C)": [1100, 1120, 1140, 1150, 1170, 1200],
+    "Tiempo de Envejecimiento (h)": [2, 3, 4, 5, 6, 8]
+  },
+  "metrics": {
+    "Resistencia a Fluencia (MPa)": [550, 600, 650, 700, 750, 800],
+    "Ductilidad (%)": [20, 19, 18, 17, 16, 15],
+    "Costo (€)": [7000, 7500, 8000, 9000, 9500, 10000]
+  }
+}
