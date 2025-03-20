@@ -6,7 +6,7 @@ import plotly.express as px
 
 # Configuración de la página, logo y eslogan
 st.set_page_config(
-    page_title="QuimicAI - Química Inteligente",
+    page_title="QuimicAI - Menos Ensayo, Menos Fallo",
     page_icon="🔬",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -74,11 +74,11 @@ with col1:
 with col2:
     st.markdown(
         """
-        <h1 style='margin-bottom: 0;'>QuimicAI - <span style='color: #4CAF50;'>Química Inteligente</span></h1>
+        <h1 style='margin-bottom: 0;'>QuimicAI - <span style='color: #4CAF50;'>Menos Ensayo, Más Acierto</span></h1>
         <h3 style='color: #555; margin-top: 5px;'>Optimización inteligente de procesos complejos</h3>
         <p style='font-size: 1.1em; margin-bottom: 5em;'>
             Con <strong>QuimicAI</strong> reduces costes y acortas tiempos en ensayos experimentales mediante simulaciones continuas y precisas.<br>
-            Descubre cómo optimizar reacciones, materiales y procesos biológicos con funciones continuas personalizadas.
+            Descubre cómo optimizar reacciones, materiales y procesos biológicos con un servicio personalizado.
         </p>
         """,
         unsafe_allow_html=True
@@ -201,6 +201,64 @@ chem_display_names = {
     "Temp": "Temperatura (°C)",
     "Presion": "Presión (atm)"
 }
+
+# Constantes globales para el modelo Arrhenius
+R = 8.314  # Constante de gases en J/(mol*K)
+Ea = 50000  # Energía de activación (J/mol) - valor de ejemplo
+A0 = 1e6    # Factor pre-exponencial base (1/s) - valor de ejemplo
+
+def chem_constante_k(TiCl3, Al_Ti, Temp, Presion):
+    """
+    Calcula la constante cinética k(T) asumiendo un comportamiento Arrhenius
+    y que las desviaciones de TiCl3, Al_Ti y Presion modulan ligeramente el valor de A.
+    Temp se asume en °C, por lo que se convierte a K.
+    """
+
+    # Convertimos la temperatura a Kelvin
+    T_kelvin = Temp + 273.15
+    
+    # --- Ajuste del factor pre-exponencial (A) según desviaciones de parámetros ---
+    # Supongamos que, además de la temperatura, la cantidad de catalizador y la
+    # relación Al/Ti pueden afectar el "A efectivo". Mantenemos la idea de un factor
+    # exponencial que penalice la desviación de valores óptimos.
+    
+    opt = {"TiCl3": 0.3, "Al_Ti": 9, "Presion": 10}
+    sigma = {"TiCl3": 0.1, "Al_Ti": 1.5, "Presion": 3}
+    
+    # Cálculo de la "penalización" (o modulación) basado en los otros parámetros
+    term = ((TiCl3 - opt["TiCl3"]) / sigma["TiCl3"])**2 \
+         + ((Al_Ti - opt["Al_Ti"])   / sigma["Al_Ti"])**2 \
+         + ((Presion - opt["Presion"]) / sigma["Presion"])**2
+
+    # Factor multiplicativo para A en función de la desviación
+    # (cuanto mayor sea 'term', menor será el factor)
+    modulation_factor = np.exp(-0.5 * term)
+    
+    # Factor pre-exponencial "ajustado"
+    A_eff = A0 * modulation_factor
+    
+    # --- Ecuación de Arrhenius ---
+    k = A_eff * np.exp(-Ea / (R * T_kelvin))
+    
+    return k
+
+
+def chem_velocidad_polimerizacion(TiCl3, Al_Ti, Temp, Presion):
+    """
+    Calcula la velocidad de polimerización r = k(T) * [monómero].
+    Aquí usamos la presión como proxy de la concentración del monómero.
+    """
+    # Obtenemos la constante cinética con la función anterior
+    k_val = chem_constante_k(TiCl3, Al_Ti, Temp, Presion)
+    
+    # Usamos la presión como concentración (muy simplificado)
+    # Podrías añadir factores de conversión o usar una fracción de la presión total.
+    monomero_conc = Presion  # Proxy simple: [monómero] ~ Presión (atm)
+    
+    # Velocidad de reacción
+    r = k_val * monomero_conc
+    return r
+
 def chem_peso_molecular(TiCl3, Al_Ti, Temp, Presion):
     base = 2800000
     gain = 3100000
@@ -230,6 +288,8 @@ def chem_costo(TiCl3, Al_Ti, Temp, Presion):
     return base - reduction * np.exp(-0.5*term)
 
 chem_metric_functions = {
+    "Constante Cinética": chem_constante_k,
+    "Velocidad de Polimerización": chem_velocidad_polimerizacion,
     "Peso molecular (g/mol)": chem_peso_molecular,
     "Rendimiento (%)": chem_rendimiento,
     "Costo (€)": chem_costo
